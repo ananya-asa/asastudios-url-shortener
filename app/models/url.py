@@ -3,6 +3,8 @@ from datetime import datetime
 
 
 class URL(SQLModel, table=True):
+    __tablename__ = "urls"
+    
     id: int | None = Field(default=None, primary_key=True)
     short_code: str = Field(index=True, unique=True, max_length=10)
     long_url: str = Field(index=True, unique=True, max_length=2000)
