@@ -1,4 +1,7 @@
 from sqlmodel import SQLModel,create_engine, Session
+from app.models.url import URL
+from app.models.click import Click
+
 
 DATABASE_URL = "sqlite:///./url_shortener.db"
 
