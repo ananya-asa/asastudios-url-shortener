@@ -2,12 +2,12 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.models.url import URL
 from app.models.click import Click
-from app.api.schemas import ShortenRequest, ShortenResponse
+from app.api.schemas import ClickDay, ShortenRequest, ShortenResponse, StatsResponse
 from app.db.session import get_session
 from app.services.shortener import encode_base62
 
@@ -70,3 +70,26 @@ def redirect_to_long_url(short_code: str, session: Session=Depends(get_session))
     session.add(new_click)
     session.commit()
     return RedirectResponse(url=short_code_entry.long_url,status_code=302)
+
+
+
+@router.get("/{short_code}/stats")
+def get_short_code_stats(short_code: str, session: Session=Depends(get_session)):
+    short_code_entry=session.exec(
+        select(URL).where(URL.short_code==short_code)).first()
+    
+    if short_code_entry is None:
+        raise HTTPException(status_code=404, detail="ShortCODE NOT FOUND")
+    if short_code_entry.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=410, detail="ShortCODE EXPIRED")
+    
+    stats = session.exec(
+        select(func.date(Click.clicked_at), func.count())
+        .where(Click.short_code == short_code)
+        .group_by(func.date(Click.clicked_at))
+    ).all()
+
+    return StatsResponse(
+        total_clicks=sum(count for _, count in stats),
+        clicks_per_day=[ClickDay(date=str(date)[:10], count=count) for date, count in stats]
+    )
