@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, func, select
-from sqlalchemy.exc import IntegrityError
+
 
 from fastapi import Request
 
@@ -58,7 +58,8 @@ def shorten_url(request: Request,body: ShortenRequest, session: Session = Depend
 # Get Shortcode
 
 @router.get("/{short_code}")
-def redirect_to_long_url(short_code: str, session: Session=Depends(get_session)):
+@limiter.limit("100/minute")
+def redirect_to_long_url(request: Request, short_code: str, session: Session=Depends(get_session)):
     short_code_entry=session.exec(
         select(URL).where(URL.short_code==short_code)).first()
 
@@ -79,7 +80,8 @@ def redirect_to_long_url(short_code: str, session: Session=Depends(get_session))
 
 
 @router.get("/{short_code}/stats")
-def get_short_code_stats(short_code: str, session: Session=Depends(get_session)):
+@limiter.limit("15/minute")
+def get_short_code_stats(request: Request, short_code: str, session: Session=Depends(get_session)):
     short_code_entry=session.exec(
         select(URL).where(URL.short_code==short_code)).first()
     
