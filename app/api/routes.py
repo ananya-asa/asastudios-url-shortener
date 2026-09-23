@@ -5,21 +5,26 @@ from fastapi.responses import RedirectResponse
 from sqlmodel import Session, func, select
 from sqlalchemy.exc import IntegrityError
 
+from fastapi import Request
+
 from app.models.url import URL
 from app.models.click import Click
 from app.api.schemas import ClickDay, ShortenRequest, ShortenResponse, StatsResponse
 from app.db.session import get_session
 from app.services.shortener import encode_base62
+from app.core import limiter
+
 
 router = APIRouter()
 
 
 @router.post("/shorten")
-def shorten_url(request: ShortenRequest, session: Session = Depends(get_session)):
+@limiter.limit("5/minute")
+def shorten_url(request: Request,body: ShortenRequest, session: Session = Depends(get_session)):
     now = datetime.utcnow()
 
     existing = session.exec(
-        select(URL).where(URL.long_url == request.long_url)
+        select(URL).where(URL.long_url == body.long_url)
     ).first()
 
     if existing is not None:
@@ -33,7 +38,7 @@ def shorten_url(request: ShortenRequest, session: Session = Depends(get_session)
         )
 
     new_url = URL(
-        long_url=request.long_url,
+        long_url=body.long_url,
         created_at=now,
         expires_at=now + timedelta(days=30),
     )
