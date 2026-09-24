@@ -1,8 +1,9 @@
 from sqlmodel import SQLModel
+from pydantic import HttpUrl
 from datetime import datetime
 
 class ShortenRequest(SQLModel):
-    long_url: str
+    long_url: HttpUrl
 
 class ShortenResponse(SQLModel):
     short_url: str

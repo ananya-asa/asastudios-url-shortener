@@ -22,9 +22,10 @@ router = APIRouter()
 @limiter.limit("5/minute")
 def shorten_url(request: Request,body: ShortenRequest, session: Session = Depends(get_session)):
     now = datetime.utcnow()
+    long_url = str(body.long_url)
 
     existing = session.exec(
-        select(URL).where(URL.long_url == body.long_url)
+        select(URL).where(URL.long_url == long_url)
     ).first()
 
     if existing is not None:
@@ -38,7 +39,7 @@ def shorten_url(request: Request,body: ShortenRequest, session: Session = Depend
         )
 
     new_url = URL(
-        long_url=body.long_url,
+        long_url=long_url,
         created_at=now,
         expires_at=now + timedelta(days=30),
     )
