@@ -6,3 +6,17 @@ def test_shorten_new_url(client):
     assert "short_url" in data
     assert "expires_at" in data
 
+def test_shorten_duplicate_url(client):
+    url = {"long_url": "https://example.com"}
+
+    first_response = client.post("/shorten", json=url)
+    second_response = client.post("/shorten", json=url)
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 200
+
+    first_data = first_response.json()
+    second_data = second_response.json()
+
+    assert second_data["short_url"] == first_data["short_url"]
+    assert "expires_at" in second_data
