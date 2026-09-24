@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 from sqlmodel import Session, func, select
 
 
-from fastapi import Request
+from fastapi import Request, Response
 
 from app.models.url import URL
 from app.models.click import Click
@@ -20,7 +20,12 @@ router = APIRouter()
 
 @router.post("/shorten")
 @limiter.limit("5/minute")
-def shorten_url(request: Request,body: ShortenRequest, session: Session = Depends(get_session)):
+def shorten_url(
+    request: Request,
+    body: ShortenRequest,
+    response: Response,
+    session: Session = Depends(get_session),
+):
     now = datetime.utcnow()
     long_url = str(body.long_url)
 
@@ -50,6 +55,7 @@ def shorten_url(request: Request,body: ShortenRequest, session: Session = Depend
     new_url.short_code = encode_base62(new_url.id)
     session.add(new_url)
     session.commit()
+    response.status_code = 201
 
     return ShortenResponse(
         short_url=f"https://asastudios.com/{new_url.short_code}",
