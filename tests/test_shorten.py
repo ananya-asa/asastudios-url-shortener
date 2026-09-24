@@ -1,3 +1,6 @@
+import pytest
+
+
 def test_shorten_new_url(client):
     response = client.post("/shorten", json={"long_url": "https://example.com"})
 
@@ -5,6 +8,7 @@ def test_shorten_new_url(client):
     data = response.json()
     assert "short_url" in data
     assert "expires_at" in data
+
 
 def test_shorten_duplicate_url(client):
     url = {"long_url": "https://example.com"}
@@ -20,3 +24,8 @@ def test_shorten_duplicate_url(client):
 
     assert second_data["short_url"] == first_data["short_url"]
     assert "expires_at" in second_data
+
+
+def test_shorten_rejects_invalid_url(client):
+    response = client.post("/shorten", json={"long_url": "not-a-url"})
+    assert response.status_code == 422
