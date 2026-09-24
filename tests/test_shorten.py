@@ -49,3 +49,8 @@ def test_redirect_records_click_and_returns_302(client):
 
     assert redirect_response.status_code == 302
     assert redirect_response.headers["location"].rstrip("/") == "https://example.com"    
+
+
+def test_redirect_unknown_short_code_returns_404(client):
+    response = client.get("/does-not-exist", follow_redirects=False)
+    assert response.status_code == 404
