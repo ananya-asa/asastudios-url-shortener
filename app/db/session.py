@@ -1,11 +1,13 @@
-from sqlmodel import SQLModel,create_engine, Session
+import os
+
+from sqlmodel import SQLModel, create_engine, Session
 from app.models.url import URL
 from app.models.click import Click
 
 
-DATABASE_URL = "sqlite:///./url_shortener.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./url_shortener.db")
 
-engine=create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=True)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
