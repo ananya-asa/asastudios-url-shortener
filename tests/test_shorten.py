@@ -1,4 +1,10 @@
+from datetime import datetime, timedelta
+
 import pytest
+from sqlmodel import Session, select
+
+from app.main import app
+from app.models.url import URL
 
 
 def test_shorten_new_url(client):
@@ -54,3 +60,25 @@ def test_redirect_records_click_and_returns_302(client):
 def test_redirect_unknown_short_code_returns_404(client):
     response = client.get("/does-not-exist", follow_redirects=False)
     assert response.status_code == 404
+
+
+def test_redirect_expired_short_code_returns_410(client):
+    create_response = client.post(
+        "/shorten",
+        json={"long_url": "https://example.com"},
+    )
+    assert create_response.status_code == 201
+
+    short_code = create_response.json()["short_url"].rstrip("/").split("/")[-1]
+
+    with Session(app.state.test_engine) as session:
+        row = session.exec(
+            select(URL).where(URL.short_code == short_code)
+        ).first()
+        assert row is not None
+        row.expires_at = datetime.utcnow() - timedelta(days=1)
+        session.add(row)
+        session.commit()
+
+    response = client.get(f"/{short_code}", follow_redirects=False)
+    assert response.status_code == 410

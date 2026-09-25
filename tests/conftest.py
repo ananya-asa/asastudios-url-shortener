@@ -14,6 +14,7 @@ def client():
         poolclass=StaticPool,
     )
     SQLModel.metadata.create_all(engine)
+    app.state.test_engine = engine
 
     def get_session_override():
         with Session(engine) as session:
@@ -25,3 +26,4 @@ def client():
         yield test_client
 
     app.dependency_overrides.clear()
+    app.state.test_engine = None
