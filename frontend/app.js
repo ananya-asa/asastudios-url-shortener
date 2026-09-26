@@ -44,9 +44,8 @@ form.addEventListener("submit", async (event) => {
     if (response.status === 429) return showFeedback("Slow down, try again shortly.");
     if (!response.ok) return showFeedback("Couldn't create that link. Try again shortly.");
     const data = await response.json();
-    const path = new URL(data.short_url).pathname;
-    shortUrl.href = `${window.location.origin}${path}`;
-    shortUrl.textContent = shortUrl.href;
+    shortUrl.href = data.short_url;
+    shortUrl.textContent = data.short_url;
     const expiry = new Date(data.expires_at);
     expiresAt.dateTime = expiry.toISOString();
     expiresAt.textContent = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(expiry);
