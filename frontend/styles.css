@@ -110,18 +110,60 @@ input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); ou
   font-weight: 700;
   font-size: 1.1rem;
   cursor: pointer;
+  transition: transform 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
 }
 
+#generate-button:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.04); }
 #generate-button:disabled { cursor: wait; opacity: 0.7; }
+#generate-button.is-loading { position: relative; }
+#generate-button.is-loading::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  display: inline-block;
+  border: 2px solid rgba(17, 24, 33, 0.35);
+  border-top-color: #111821;
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 #form-feedback {
   margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
   color: var(--muted);
   font-size: 13px;
+  line-height: 1.45;
 }
 
-#short-result {
+#form-feedback.is-error {
+  border-color: rgba(255, 153, 146, 0.4);
+  background: rgba(255, 112, 84, 0.08);
+  color: #ffb0a3;
+}
+
+.result-card {
   margin-top: 30px;
+  padding: 18px 18px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.015);
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.result-card.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 #short-result > p:first-child {

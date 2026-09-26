@@ -7,8 +7,9 @@ const result = document.querySelector("#short-result");
 const shortUrl = document.querySelector("#short-url");
 const expiresAt = document.querySelector("#expires-at");
 
-function showFeedback(message) {
+function showFeedback(message, isError = false) {
   feedback.textContent = message;
+  feedback.classList.toggle("is-error", isError);
   feedback.hidden = false;
 }
 
@@ -32,17 +33,20 @@ copyButton.addEventListener("click", async () => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   feedback.hidden = true;
+  feedback.classList.remove("is-error");
   button.disabled = true;
+  button.classList.add("is-loading");
   button.textContent = "Generating";
+  result.classList.remove("is-visible");
   try {
     const response = await fetch("/shorten", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ long_url: urlInput.value.trim() }),
     });
-    if (response.status === 422) return showFeedback("Enter a valid URL, including https://.");
-    if (response.status === 429) return showFeedback("Slow down, try again shortly.");
-    if (!response.ok) return showFeedback("Couldn't create that link. Try again shortly.");
+    if (response.status === 422) return showFeedback("That URL is about as valid as a fake Wi‑Fi name.", true);
+    if (response.status === 429) return showFeedback("Too many links. The server needs a tiny coffee break.", true);
+    if (!response.ok) return showFeedback("The link machine is having a dramatic exit. Try again.", true);
     const data = await response.json();
     shortUrl.href = data.short_url;
     shortUrl.textContent = data.short_url;
@@ -52,10 +56,12 @@ form.addEventListener("submit", async (event) => {
     copyButton.textContent = "Copy";
     copyButton.classList.remove("is-copied");
     result.hidden = false;
+    requestAnimationFrame(() => result.classList.add("is-visible"));
   } catch {
     showFeedback("Couldn't reach the server. Check your connection and try again.");
   } finally {
     button.disabled = false;
+    button.classList.remove("is-loading");
     button.textContent = "Generate";
   }
 });
