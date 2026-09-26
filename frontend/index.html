@@ -11,25 +11,27 @@
     <a class="wordmark" href="/">ASA STUDIOS</a>
   </header>
   <main class="page-main">
-    <h1>Link studio</h1>
-    <form id="shorten-form" novalidate>
-      <label for="long-url">Long URL</label>
-      <div class="form-row">
-        <input id="long-url" name="long_url" type="text" inputmode="url" placeholder="https://example.com/your-link">
-        <button id="generate-button" type="submit">Generate</button>
-      </div>
-      <p id="form-feedback" role="status" aria-live="polite" hidden></p>
-    </form>
-    <section id="short-result" aria-live="polite" hidden>
-      <p>YOUR SHORT LINK</p>
-      <div class="result-row">
-        <a id="short-url" href=""></a>
-        <button id="copy-button" type="button" class="copy-button">Copy</button>
-      </div>
-      <p>Expires <time id="expires-at"></time></p>
-    </section>
+    <div class="studio-card">
+      <h1>Link studio</h1>
+      <form id="shorten-form" novalidate>
+        <label for="long-url">Long URL</label>
+        <div class="form-row">
+          <input id="long-url" name="long_url" type="text" inputmode="url" placeholder="https://example.com/your-link">
+          <button id="generate-button" type="submit">Generate</button>
+        </div>
+        <p id="form-feedback" role="status" aria-live="polite" hidden></p>
+      </form>
+      <section id="short-result" aria-live="polite" hidden>
+        <p>YOUR SHORT LINK</p>
+        <div class="result-row">
+          <a id="short-url" href=""></a>
+          <button id="copy-button" type="button" class="copy-button">Copy</button>
+        </div>
+        <p class="expires-label">Expires <time id="expires-at"></time></p>
+      </section>
+    </div>
   </main>
-  <footer class="site-footer">ASA STUDIOS</footer>
+  <footer class="site-footer">Built by developer name</footer>
   <script src="/static/app.js" defer></script>
 </body>
 </html>
