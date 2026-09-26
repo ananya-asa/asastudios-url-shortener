@@ -12,6 +12,14 @@
   </header>
   <main class="page-main">
     <h1>Link studio</h1>
+    <form id="shorten-form" novalidate>
+      <label for="long-url">Long URL</label>
+      <div class="form-row">
+        <input id="long-url" name="long_url" type="text" inputmode="url" placeholder="https://example.com/your-link">
+        <button id="generate-button" type="submit">Generate</button>
+      </div>
+      <p id="form-feedback" role="status" aria-live="polite" hidden></p>
+    </form>
   </main>
   <footer class="site-footer">ASA STUDIOS</footer>
 </body>

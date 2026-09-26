@@ -4,4 +4,6 @@ def test_homepage_is_served(client):
 
     assert response.status_code == 200
     assert "ASA STUDIOS" in response.text
+    assert 'id="long-url"' in response.text
+    assert 'id="generate-button"' in response.text
     assert stylesheet.status_code == 200
