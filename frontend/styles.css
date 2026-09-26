@@ -218,9 +218,42 @@ input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); ou
   text-transform: uppercase;
 }
 
-@media (max-width: 560px) {
-  .studio-card { padding: 22px 18px 18px; }
-  .form-row, .result-row { flex-direction: column; }
-  #generate-button { width: 100%; }
-  .copy-button { width: 100%; }
+@media (max-width: 680px) {
+  .site-header, .site-footer, .page-main {
+    width: min(calc(100% - 24px), 1184px);
+  }
+
+  .page-main {
+    padding-block: 28px 16px;
+  }
+
+  .studio-card {
+    padding: 22px 16px 18px;
+    border-radius: 18px;
+  }
+
+  .wordmark {
+    letter-spacing: 0.12em;
+  }
+
+  h1 {
+    margin-bottom: 16px;
+  }
+
+  .form-row, .result-row {
+    flex-direction: column;
+  }
+
+  #generate-button, .copy-button {
+    width: 100%;
+  }
+
+  #short-url {
+    font-size: 1.08rem;
+  }
+
+  .site-footer {
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
 }
