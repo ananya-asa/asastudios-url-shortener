@@ -45,8 +45,15 @@ input:focus-visible, button:focus-visible { outline: 2px solid #dce0e3; outline-
 #generate-button { padding-inline: 20px; border: 0; background: var(--accent); color: #11161a; font-weight: 700; cursor: pointer; }
 #generate-button:disabled { cursor: wait; opacity: 0.7; }
 #form-feedback { color: var(--muted); font-size: 13px; }
+#short-result { margin-top: 28px; max-width: 680px; }
+#short-result > p:first-child { color: var(--muted); font-size: 12px; letter-spacing: 0.14em; }
+.result-row { display: flex; align-items: center; gap: 12px; }
+#short-url { color: var(--accent); font-size: 18px; word-break: break-all; }
+.copy-button { min-height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 4px; background: #1b1e21; color: var(--foreground); cursor: pointer; }
+.copy-button.is-copied { border-color: #7bd3a4; color: #7bd3a4; }
 
 @media (max-width: 560px) {
-  .form-row { flex-direction: column; }
+  .form-row, .result-row { flex-direction: column; }
   #generate-button { min-height: 48px; }
+  .copy-button { width: 100%; }
 }
