@@ -70,6 +70,10 @@ docker compose up --build
 
 The credentials in Compose are development defaults and should be replaced before any production deployment.
 
+## Deploy to Render
+
+The repository includes a Render Blueprint in `render.yaml`. Push it to GitHub, then in Render choose **New + > Blueprint**, connect this repository, and apply the Blueprint. Render builds the Docker image, creates PostgreSQL, and supplies the database URL and public service URL. The Blueprint uses free plans for a demo: free web services spin down when idle, and free PostgreSQL expires after 30 days (with a 14-day grace period to upgrade before deletion). Upgrade the database plan if the deployed data needs to persist.
+
 ## API
 
 | Method | Path | Behavior |

@@ -6,6 +6,10 @@ from app.models.click import Click
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./url_shortener.db")
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 engine = create_engine(DATABASE_URL, echo=True)
 
