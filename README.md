@@ -1,8 +1,40 @@
 # ASA Studios URL Shortener
 
-A small URL-shortening service with a vanilla HTML/CSS/JavaScript interface, a FastAPI API, and SQLite or PostgreSQL storage. New links expire after 30 days.
+[![CI](https://github.com/ananya-asa/asastudios-url-shortener/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/ananya-asa/asastudios-url-shortener/actions/workflows/tests.yml)
 
-## Run locally
+A compact URL-shortening service built with FastAPI, SQLModel, and a vanilla HTML/CSS/JavaScript frontend. It creates expiring short links, redirects visitors, and records click statistics.
+
+## Architecture
+
+```mermaid
+flowchart LR
+	Browser[Browser: HTML, CSS, JavaScript] -->|same-origin HTTP| API[FastAPI: UI, API, rate limits]
+	API --> ORM[SQLModel / SQLAlchemy]
+	ORM --> LocalDB[(SQLite: local development and tests)]
+	ORM --> PgDB[(PostgreSQL: Docker Compose)]
+	CI[GitHub Actions] --> Tests[pytest]
+	Tests --> LocalDB
+```
+
+FastAPI serves the frontend and API from one origin. `DATABASE_URL` selects the database; Compose runs PostgreSQL alongside the API, while local development and the current test fixture use SQLite.
+
+## Design Decisions
+
+- **Lookup-first deduplication:** the service queries the unique `long_url` before inserting. Repeated submissions reuse the existing link and return `200`, while a newly created link returns `201`. The database unique constraint is a final integrity guard; concurrent first-time submissions are not currently retried after a uniqueness conflict.
+- **Base62 codes from database IDs:** encoding the assigned integer ID produces compact URLs without maintaining a separate random-code generator. The tradeoff is that codes are predictable and enumerable; this is suitable for a demo, not for links that need unguessability.
+- **Expiry is enforced at read time:** expired links return `410 Gone`. There is no scheduled purge job, so expired rows remain stored. Click rows declare an `ON DELETE CASCADE` foreign key; cleanup only applies when a URL row is physically deleted and the database enforces that constraint. Expiry itself does not delete rows or click history.
+- **SQLite locally, PostgreSQL in Compose:** SQLite keeps setup fast and self-contained. PostgreSQL gives the containerized app a production-style relational database. The API chooses the database through `DATABASE_URL` rather than branching on database type.
+- **One origin for the frontend and API:** relative requests such as `/shorten` avoid local CORS configuration and keep the interface deployable with the API.
+
+## Features
+
+- Create short links that expire after 30 days.
+- Reuse a short link for a previously submitted destination.
+- Redirect and record clicks; view total and per-day statistics.
+- Apply per-client rate limits to link creation, redirects, and statistics.
+- Return distinct `404` and `410` pages for unknown and expired links.
+
+## Run Locally
 
 Requirements: Python 3.11+.
 
@@ -13,13 +45,13 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
 ```
 
-Open <http://127.0.0.1:8010>. Local development uses `sqlite:///./url_shortener.db` by default. Set `DATABASE_URL` to use another database, and set `PUBLIC_BASE_URL` when the generated short links should use a different public address. For example, in PowerShell:
+Open <http://127.0.0.1:8010>. Local development defaults to `sqlite:///./url_shortener.db`. Set `DATABASE_URL` to use another database. Set `PUBLIC_BASE_URL` when generated links should use a different public address; in PowerShell, for example:
 
 ```powershell
 $env:PUBLIC_BASE_URL = "http://127.0.0.1:8010"
 ```
 
-FastAPI's interactive API documentation is available at <http://127.0.0.1:8010/docs>.
+Interactive API documentation: <http://127.0.0.1:8010/docs>.
 
 ## Run with Docker Compose
 
@@ -29,28 +61,34 @@ Requirements: Docker Engine with the Compose plugin.
 docker compose up --build
 ```
 
-Open <http://127.0.0.1:8000>. Compose starts PostgreSQL, waits for its health check, and then starts the API. PostgreSQL data is kept in a named volume. Compose uses `http://127.0.0.1:8000` for generated links by default. To use another public address, set `PUBLIC_BASE_URL` before starting Compose:
+Open <http://127.0.0.1:8000>. Compose waits for PostgreSQL's health check before starting the API; database files persist in a named volume. The Compose default for generated URLs is `http://127.0.0.1:8000`. To use another public address, set `PUBLIC_BASE_URL` before starting Compose:
 
 ```powershell
 $env:PUBLIC_BASE_URL = "https://short.example.com"
 docker compose up --build
 ```
 
+The credentials in Compose are development defaults and should be replaced before any production deployment.
+
 ## API
 
 | Method | Path | Behavior |
 | --- | --- | --- |
-| `POST` | `/shorten` | Creates or reuses a short link. Send `{"long_url":"https://example.com"}`. New links return `201`; duplicates return `200`. |
-| `GET` | `/{short_code}` | Records a click and redirects to the destination. |
+| `POST` | `/shorten` | Send `{"long_url":"https://example.com"}`. New links return `201`; duplicate destinations return `200`. |
+| `GET` | `/{short_code}` | Records a click and redirects to the destination with `302`. |
 | `GET` | `/{short_code}/stats` | Returns total clicks and daily click counts. |
-| `GET` | `/health` | Returns the service health status. |
+| `GET` | `/health` | Returns `{"status":"ok"}`. |
 
-Short links expire after 30 days. Invalid input returns `422`; unknown links return `404`; expired links return `410`. Rate limits are 5 link-creation requests, 100 redirects, and 15 stats requests per minute per client address; limited requests return `429`.
+Invalid request data returns `422`; unknown codes return `404`; expired links return `410`. Rate limits are 5 creation requests, 100 redirects, and 15 stats requests per minute per client address; limited requests return `429`.
 
-## Tests
+## Tests and CI
+
+Run the suite locally:
 
 ```sh
 python -m pytest -q
 ```
 
-The test client uses an isolated in-memory SQLite database. The application uses PostgreSQL in Docker Compose and in the GitHub Actions test workflow.
+The tests cover new and duplicate URL creation, invalid input, creation rate limiting, redirects and click recording, unknown and expired codes, and statistics. The test fixture overrides the app's database dependency with an isolated in-memory SQLite database.
+
+GitHub Actions runs the pytest suite on pushes and pull requests to `main`. Although the workflow currently provisions a PostgreSQL service, the fixture still uses SQLite, so the suite does **not** currently verify PostgreSQL-specific behavior. Docker Compose is the current path for running the app against PostgreSQL.
