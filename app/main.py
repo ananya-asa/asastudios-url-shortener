@@ -1,5 +1,8 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -15,9 +18,14 @@ async def lifespan(app: FastAPI):
     # any shutdown/cleanup code would go here, after yield
 
 app = FastAPI(lifespan=lifespan)
+frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+@app.get("/", include_in_schema=False)
+def frontend():
+    return FileResponse(frontend_dir / "index.html")
 
 @app.get("/health")
 def health_check():
