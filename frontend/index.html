@@ -22,12 +22,19 @@
         <p id="form-feedback" role="status" aria-live="polite" hidden></p>
       </form>
       <section id="short-result" class="result-card" aria-live="polite" hidden>
-        <p>YOUR SHORT LINK</p>
-        <div class="result-row">
-          <a id="short-url" href=""></a>
-          <button id="copy-button" type="button" class="copy-button">Copy</button>
+        <div class="success-state">
+          <p>YOUR SHORT LINK</p>
+          <div class="result-row">
+            <a id="short-url" href=""></a>
+            <button id="copy-button" type="button" class="copy-button">Copy</button>
+          </div>
+          <p class="expires-label">Expires <time id="expires-at"></time></p>
         </div>
-        <p class="expires-label">Expires <time id="expires-at"></time></p>
+
+        <div id="rate-limit-error" class="rate-limit-error" hidden>
+          <img src="/static/assets/tired-server.png" alt="Tired server illustration" class="rate-limit-image">
+          <p>Too many links. The server needs a tiny coffee break.</p>
+        </div>
       </section>
     </div>
   </main>
