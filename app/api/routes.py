@@ -12,7 +12,7 @@ from app.models.click import Click
 from app.api.schemas import ClickDay, ShortenRequest, ShortenResponse, StatsResponse
 from app.db.session import get_session
 from app.services.shortener import encode_base62
-from app.core import limiter
+from app.core import PUBLIC_BASE_URL, limiter
 
 
 router = APIRouter()
@@ -39,7 +39,7 @@ def shorten_url(
             session.add(existing)
             session.commit()
         return ShortenResponse(
-            short_url=f"https://asastudios.com/{existing.short_code}",
+            short_url=f"{PUBLIC_BASE_URL}/{existing.short_code}",
             expires_at=existing.expires_at,
         )
 
@@ -58,7 +58,7 @@ def shorten_url(
     response.status_code = 201
 
     return ShortenResponse(
-        short_url=f"https://asastudios.com/{new_url.short_code}",
+        short_url=f"{PUBLIC_BASE_URL}/{new_url.short_code}",
         expires_at=new_url.expires_at,
     )
 
