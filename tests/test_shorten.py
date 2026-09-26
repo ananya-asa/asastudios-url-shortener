@@ -37,6 +37,21 @@ def test_shorten_rejects_invalid_url(client):
     assert response.status_code == 422
 
 
+def test_shorten_rate_limit_returns_429(client):
+    for request_number in range(5):
+        response = client.post(
+            "/shorten",
+            json={"long_url": f"https://example.com/{request_number}"},
+        )
+        assert response.status_code == 201
+
+    limited_response = client.post(
+        "/shorten",
+        json={"long_url": "https://example.com/limited"},
+    )
+    assert limited_response.status_code == 429
+
+
 
 def test_redirect_records_click_and_returns_302(client):
     create_response = client.post(

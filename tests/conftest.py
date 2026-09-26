@@ -5,9 +5,11 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.db.session import get_session
+from app.core import limiter
 
 @pytest.fixture
 def client():
+    limiter._storage.reset()
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
