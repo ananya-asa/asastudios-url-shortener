@@ -4,6 +4,22 @@
 
 A compact URL-shortening service built with FastAPI, SQLModel, and a vanilla HTML/CSS/JavaScript frontend. It creates expiring short links, redirects visitors, and records click statistics.
 
+**Live demo:** [asa-studios-url-shortener.onrender.com](https://asa-studios-url-shortener.onrender.com/)
+
+## Screenshots
+
+### Enter a URL
+
+![URL input screen](frontend/assets/input.png)
+
+### Generated short link
+
+![Generated short link screen](frontend/assets/output.png)
+
+### Rate-limit feedback
+
+![Rate-limit error screen](frontend/assets/ratelimit.png)
+
 ## Architecture
 
 ```mermaid
@@ -72,7 +88,7 @@ The credentials in Compose are development defaults and should be replaced befor
 
 ## Deploy to Render
 
-The repository includes a Render Blueprint in `render.yaml`. Push it to GitHub, then in Render choose **New + > Blueprint**, connect this repository, and apply the Blueprint. Render builds the Docker image, creates PostgreSQL, and supplies the database URL and public service URL. The Blueprint uses free plans for a demo: free web services spin down when idle, and free PostgreSQL expires after 30 days (with a 14-day grace period to upgrade before deletion). Upgrade the database plan if the deployed data needs to persist.
+The live demo is deployed from the repository's Render Blueprint in `render.yaml`. Render builds the Docker image, provisions PostgreSQL, and supplies the database URL and public service URL. The current demo uses free plans: the web service may spin down when idle, and free PostgreSQL expires after 30 days (with a 14-day grace period to upgrade before deletion). Upgrade the database plan to retain deployed data beyond that period.
 
 ## API
 
